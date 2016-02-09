@@ -173,6 +173,46 @@ The Result:
 }
 ```
 
+So, that is super cool, but a bunch defined data structures with no data doesn't help much! We need to be able to set data into the object. Setting properties can be accomplished using [`setProperty`](#setpropertycontract-name-value), or when working with hashes, using [`addHash`](#addhashhashset-value).
+
+```cfc
+setProperty(addressContract, "address_1", "300 Test St.");
+```
+results in the output:
+```cfc
+{
+  address_1: "300 Test St.",
+  address_2: "",
+  city: "",
+  state: "",
+  post_code: "",
+  country: ""
+}
+```
+
+Trying to set a property that doesn't exist fails silently:
+```cfc
+setProperty(addressContract, "kitties", "Meow Meow");
+```
+results in the unscathed output:
+```cfc
+{
+  address_1: "",
+  address_2: "",
+  city: "",
+  state: "",
+  post_code: "",
+  country: ""
+}
+```
+
+
+Now that we know how to create and set a contract, how to we get the contract in a useable form? Use [`getObject`](#getobjectcontract) to convert the contract to a structure.
+```cfc
+var order = getObject(orderContract);
+WriteDump(order); // see the struct to the order
+```
+
 
 ## Quick Start
 
@@ -203,13 +243,133 @@ component extends="EnforcedCFOO" {
     // now build out the contract
     WriteDump(getObject(simpleContract));
 
+    // now convert the contract to a structure for use wherever
     return getObject(simpleContract);
   }
 }
 ```
 
 ## Example
-For the purposes of this readme, we will use the example of an "order". Orders have a delivery & billing address, delivery options, order total information, and some other data associated with them. [Check out the fully functional standalone example.](/example/)
+For the purposes of this readme, we will use the example of an "order". Orders have a delivery & billing address, delivery options, order total information, and some other data associated with them. [Check out the fully functional standalone example from the code below.](/example/)
+
+
+#### `OrderContracts.cfc`
+The `OrderContracts.cfc` is where we `extend` `EnforcedCFOO` and create all of our contracts. No logic exists in this component.
+
+```cfc
+// OrderContracts.cfc
+component extends="EnforcedCFOO" {
+
+  public struct function orderContract() {
+    return {
+      id: stringSetter,
+      delivery_address: addressContract,
+      billing_address: addressContract,
+      delivery_options: hashset(deliveryOptionContract),
+      accepted_cards: arraySetter,
+      has_payment: booleanSetter,
+      data: structSetter,
+      total: numberSetter,
+      phone: stringSetter
+    };
+  }
+
+  public struct function addressContract() {
+    return {
+      id: stringSetter,
+      address_1: stringSetter,
+      address_2: stringSetter,
+      city: stringSetter,
+      state: stringSetter,
+      post_code: stringSetter,
+      country: stringSetter
+    };
+  }
+
+  public struct function deliveryOptionContract() {
+    return {
+      id: numberSetter,
+      name: stringSetter,
+      price: numberSetter
+    };
+  }
+}
+```
+
+
+#### `Order.cfc`
+All of the logic for creating and adding data to our contracts exists in a second `component`, named `Order.cfc`.
+
+```cfc
+// Order.cfc
+component {
+
+  // return, and possibly initialize order contracts
+  private struct function getContracts(){
+    if(!structKeyExists(variables, "contracts")){
+      contracts = new OrderContracts(); // write contracts to the cfc's variable scope
+    }
+    return contracts;
+  }
+
+  // get an order.
+  public struct function getOrder(){
+    var contracts = getContracts();
+    var order = contracts.create(contracts.orderContract);
+
+    // set basic properties
+    contracts.setProperty(order, "id", createUUID()); // string
+    contracts.setProperty(order, "accepted_cards", ["visa", "mastercard", "discover"]); // array
+    contracts.setProperty(order, "has_payment", false); // boolean (will convert to `1` or `0`)
+    contracts.setProperty(order, "total", 27.34); // number
+    contracts.setProperty(order, "data", { // struct setting (not typically recommended)
+      account_standing: "good"
+    });
+
+    // set nested contracts
+    setBillingAddress(contracts.getProperty(order, "billing_address"));
+    setShippingAddress(contracts.getProperty(order, "delivery_address"));
+
+    // set a hashset
+    setDeliveryOptions(contracts.getProperty(order, "delivery_options"));
+
+    return contracts.getObject(order);
+  }
+
+  // set the billing address
+  private void function setBillingAddress(required any addressContract){
+    var contracts = getContracts();
+    contracts.setProperty(arguments.addressContract, "address_1", "123 Test st");
+    contracts.setProperty(arguments.addressContract, "address_2", "Apartment B-27");
+    contracts.setProperty(arguments.addressContract, "city", "High Point");
+    contracts.setProperty(arguments.addressContract, "state", "NC");
+    contracts.setProperty(arguments.addressContract, "post_code", "27265");
+  }
+
+  // set the shipping address
+  private void function setShippingAddress(required any addressContract){
+    var contracts = getContracts();
+    contracts.setProperty(arguments.addressContract, "address_1", "2000 Westmire Pt.");
+    contracts.setProperty(arguments.addressContract, "city", "Jamestown");
+    contracts.setProperty(arguments.addressContract, "state", "NC");
+    contracts.setProperty(arguments.addressContract, "post_code", "27262");
+    contracts.setProperty(arguments.addressContract, "cuntry", "USA");
+  }
+
+  // set some delivery options
+  private void function setDeliveryOptions(required any deliveryOptionsContract){
+    var contracts = getContracts();
+    var option = {};
+    for(var i = 1; i <= 3; i++){
+      option = contracts.create(contracts.deliveryOptionContract);
+      contracts.setProperty(option, "id", i);
+      contracts.setProperty(option, "name", "UPS");
+      contracts.setProperty(option, "price", i * 2.25);
+      contracts.addHash(arguments.deliveryOptionsContract, option);
+    }
+  }
+}
+```
 
 ## Details
 `EnforcedCFOO` is intended to be extended into a `cfc` whose only purpose is to contain a set of `contracts`. Each `contract` is a simple function that describes a single object at a single depth (name/value pairs). Contracts names can be anything the developer would like, however the values must be either a `setter`, another `contract` defined by the developer, or a `hashset`.
