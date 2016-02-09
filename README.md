@@ -25,9 +25,9 @@ component extends="EnforcedCFOO" {
     setProperty(simpleContract, "id", "my-id");
 
     // now build out the contract
-    WriteDump(getEntity(simpleContract));
+    WriteDump(getObject(simpleContract));
 
-    return getEntity(simpleContract);
+    return getObject(simpleContract);
   }
 }
 ```
@@ -44,7 +44,7 @@ A `setter` simply means that there are no more contracts to check against for a 
 * `numberSetter`
 
 ### HashSets
-A HashSet is an array of entities with a defined contract to check against. For example, if I need to have a list of delivery options, I may have an array of `deliveryOptionContracts` that contains the deliver by date, the cost, and an id. Setting this into a HashSet allows us to check against a predefined hash and ensure the data is reliable. HashSets have their own functions to work with them:
+A HashSet is an array of objects with a defined contract to check against. For example, if I need to have a list of delivery options, I may have an array of `deliveryOptionContracts` that contains the deliver by date, the cost, and an id. Setting this into a HashSet allows us to check against a predefined hash and ensure the data is reliable. HashSets have their own functions to work with them:
 
 #### `hashset(contract)`
 creates a `hashset` with the passed in contract to check against. This is what should be used in contract creation. For example, a contract that wants to use a hashset should read:
@@ -112,28 +112,28 @@ public struct function orderContract() {
 ### Accessors
 Now that our contracts are defined, we need to be able to get, set, and create them at will.
 
-### create(contract)
+### `create(contract)`
 This method allows the developer to create a new contract for working in the code with.
 
 ```cfc
 var order = create(orderContract);
 ```
 
-### setProperty(contract, name, value)
+### `setProperty(contract, name, value)`
 This method allows the developer to set a specific property in a given contract.
 
 ```cfc
 setProperty(order, "total", 27.34);
 ```
 
-### getProperty(contract, name)
+### `getProperty(contract, name)`
 This method allows the developer to get a specific property from a given contract.
 
 ```cfc
 getProperty(order, "total");
 ```
 
-### getObject(contract)
+### `getObject(contract)`
 This method converts the entire contract to a workable coldfusion structure. Typically this will be called at the end of all code manipulation for sending the enforced contracts off to the view or wherever it is needed.
 
 ```cfc
