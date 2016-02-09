@@ -68,7 +68,7 @@ Now, when we output the `orderContract()`, we see the following structure:
   is_verified: 0
 }
 ```
-Let's say your user has an address book of saved addresses to ship to, as well. You could add a (`hashset`)[#hashsets] of the `addressContract` to your object now and continue to have the same consistent data across all locations where address is used:
+Let's say your user has an address book of saved addresses to ship to, as well. You could add a [`hashset`](#hashsets) of the `addressContract` to your object now and continue to have the same consistent data across all locations where address is used:
 ```cfc
 public struct function orderContract() {
   return {
