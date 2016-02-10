@@ -1,11 +1,11 @@
 component extends="EnforcedCFOO" {
 
-  public struct function orderContract() {
+  public struct function orderConstraint() {
     return {
       id: stringSetter,
-      delivery_address: addressContract,
-      billing_address: addressContract,
-      delivery_options: hashset(deliveryOptionContract),
+      delivery_address: addressConstraint,
+      billing_address: addressConstraint,
+      delivery_options: hashset(deliveryOptionConstraint),
       accepted_cards: arraySetter,
       has_payment: booleanSetter,
       data: structSetter,
@@ -14,7 +14,7 @@ component extends="EnforcedCFOO" {
     };
   }
 
-  public struct function addressContract() {
+  public struct function addressConstraint() {
     return {
       id: stringSetter,
       address_1: stringSetter,
@@ -26,7 +26,7 @@ component extends="EnforcedCFOO" {
     };
   }
 
-  public struct function deliveryOptionContract() {
+  public struct function deliveryOptionConstraint() {
     return {
       id: numberSetter,
       name: stringSetter,
