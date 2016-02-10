@@ -1,67 +1,67 @@
 component {
 
   // return, and possibly initialize order contracts
-  private struct function getContracts(){
+  private struct function getContractHandler(){
     if(!structKeyExists(variables, "contracts")){
-      contracts = new OrderContracts(); // write contracts to the cfc's variable scope
+      contractHandler = new OrderContracts(); // write contractHandler to the cfc's variable scope
     }
-    return contracts;
+    return contractHandler;
   }
 
   // get an order.
   public struct function getOrder(){
-    var contracts = getContracts();
-    var order = contracts.create(contracts.orderContract);
+    var contractHandler = getContractHandler();
+    var order = contractHandler.create(contractHandler.orderConstraint);
 
     // set basic properties
-    contracts.setProperty(order, "id", createUUID()); // string
-    contracts.setProperty(order, "accepted_cards", ["visa", "mastercard", "discover"]); // array
-    contracts.setProperty(order, "has_payment", false); // boolean (will convert to `1` or `0`)
-    contracts.setProperty(order, "total", 27.34); // number
-    contracts.setProperty(order, "data", { // struct setting (not typically recommended)
+    contractHandler.setProperty(order, "id", createUUID()); // string
+    contractHandler.setProperty(order, "accepted_cards", ["visa", "mastercard", "discover"]); // array
+    contractHandler.setProperty(order, "has_payment", false); // boolean (will convert to `1` or `0`)
+    contractHandler.setProperty(order, "total", 27.34); // number
+    contractHandler.setProperty(order, "data", { // struct setting (not typically recommended)
       account_standing: "good"
     });
 
-    // set nested contracts
-    setBillingAddress(contracts.getProperty(order, "billing_address"));
-    setShippingAddress(contracts.getProperty(order, "delivery_address"));
+    // set nested constraints
+    setBillingAddress(contractHandler.getProperty(order, "billing_address"));
+    setShippingAddress(contractHandler.getProperty(order, "delivery_address"));
 
     // set a hashset
-    setDeliveryOptions(contracts.getProperty(order, "delivery_options"));
+    // setDeliveryOptions(contractHandler.getProperty(order, "delivery_options"));
 
-    return contracts.getObject(order);
+    return contractHandler.getData(order);
   }
 
   // set the billing address
-  private void function setBillingAddress(required any addressContract){
-    var contracts = getContracts();
-    contracts.setProperty(arguments.addressContract, "address_1", "123 Test st");
-    contracts.setProperty(arguments.addressContract, "address_2", "Apartment B-27");
-    contracts.setProperty(arguments.addressContract, "city", "High Point");
-    contracts.setProperty(arguments.addressContract, "state", "NC");
-    contracts.setProperty(arguments.addressContract, "post_code", "27265");
+  private void function setBillingAddress(required any addressConstraint){
+    var contractHandler = getContractHandler();
+    contractHandler.setProperty(arguments.addressConstraint, "address_1", "123 Test st");
+    contractHandler.setProperty(arguments.addressConstraint, "address_2", "Apartment B-27");
+    contractHandler.setProperty(arguments.addressConstraint, "city", "High Point");
+    contractHandler.setProperty(arguments.addressConstraint, "state", "NC");
+    contractHandler.setProperty(arguments.addressConstraint, "post_code", "27265");
   }
 
   // set the shipping address
-  private void function setShippingAddress(required any addressContract){
-    var contracts = getContracts();
-    contracts.setProperty(arguments.addressContract, "address_1", "2000 Westmire Pt.");
-    contracts.setProperty(arguments.addressContract, "city", "Jamestown");
-    contracts.setProperty(arguments.addressContract, "state", "NC");
-    contracts.setProperty(arguments.addressContract, "post_code", "27262");
-    contracts.setProperty(arguments.addressContract, "cuntry", "USA");
+  private void function setShippingAddress(required any addressConstraint){
+    var contractHandler = getContractHandler();
+    contractHandler.setProperty(arguments.addressConstraint, "address_1", "2000 Westmire Pt.");
+    contractHandler.setProperty(arguments.addressConstraint, "city", "Jamestown");
+    contractHandler.setProperty(arguments.addressConstraint, "state", "NC");
+    contractHandler.setProperty(arguments.addressConstraint, "post_code", "27262");
+    contractHandler.setProperty(arguments.addressConstraint, "cuntry", "USA");
   }
 
   // set some delivery options
-  private void function setDeliveryOptions(required any deliveryOptionsContract){
-    var contracts = getContracts();
+  private void function setDeliveryOptions(required any deliveryOptionsConstraint){
+    var contractHandler = getContractHandler();
     var option = {};
     for(var i = 1; i <= 3; i++){
-      option = contracts.create(contracts.deliveryOptionContract);
-      contracts.setProperty(option, "id", i);
-      contracts.setProperty(option, "name", "UPS");
-      contracts.setProperty(option, "price", i * 2.25);
-      contracts.addHash(arguments.deliveryOptionsContract, option);
+      option = contractHandler.create(contractHandler.deliveryOptionConstraint);
+      contractHandler.setProperty(option, "id", i);
+      contractHandler.setProperty(option, "name", "UPS");
+      contractHandler.setProperty(option, "price", i * 2.25);
+      contractHandler.addHash(arguments.deliveryOptionsConstraint, option);
     }
   }
 }
