@@ -266,7 +266,7 @@ var order = contractHandler.getData(contractHandler.orderContract);
 WriteDump(order); // see the struct to the order
 ```
 
-All of this is great, but why not just use a traditional OO approach, using components to define objects? Well, you could! I recently worked on a project with a *very* large object structure - about 30 objects, some reused to make a final data structure that used about 45 objects. I did some tick count testing on creating, setting and building the objects out, and it was taking about *650ms* on a good run (not using DI)-- not awesome. I rewrote the entire thing using `EnforcedCFOO`, and ticks for the same functionality were coming in at about *35ms*, about *95%* performance gain.
+All of this is great, but why not just use a traditional OO approach, using components to define objects? Well, you could! I recently worked on a project with a *very* large object structure - about 30 objects, some reused to make a final data structure that used about 45 objects. I did some tick count testing on creating, setting and building the objects out, and it was taking about **650ms** on a good run (not using DI)-- not awesome. I rewrote the entire thing using `EnforcedCFOO`, and ticks for the same functionality were coming in at about **35ms**, about **95%** performance gain.
 
 ## Example
 This example uses every type of `setter`, as well as an example of adding `hashsets` and setting properties. [Check out the fully functional standalone example from the code below.](/example/)
