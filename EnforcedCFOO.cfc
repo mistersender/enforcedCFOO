@@ -1,31 +1,31 @@
 component {
 
-// Start: Contract/Entity handling
+// Start: Contract handling
 //
-//  Note: Entity Handling works by holding 2 items: the contract (those lil fellas set up above), and a "build", which
+//  Note: Contract Handling works by holding 2 items: the contract (a constraint), and a "build", which
 //  is the actual data that is in the contract. When a developer sets a property into a contract, we use the `contract`
 //  to make sure that what the developer is setting is correct, and if so, we add the value to the `build`. Even though
 //  the data in the `build` var is right there, *resist using it directly* and instead call `getProperty` or `getObject`.
 
 public struct function create(
-  required any theContract // what contract should we use to create this entity?
+  required any theContract // what constraint should we use to create this contract?
 ){
-  // Note: This function should be called whenever a new entity is needed. it sets the contract up and actually builds out
-  // the skeleton entity with defaults so that we have something reliable to work against, overriding defaults as needed.
+  // Note: This function should be called whenever a new contract is needed. it sets the contract up and actually builds out
+  // the skeleton data with defaults so that we have something reliable to work against, overriding defaults as needed.
   var defaults = {
    'contract' = arguments.theContract,
-   'build' = buildEntity(arguments.theContract)
+   'build' = buildContractData(arguments.theContract)
   };
   return defaults;
 }
 
 public struct function hashSet(
-  required any contract // what contract should we enforce with this hash set?
+  required any contract // what constraint should we enforce as a contract with this hash set?
 ) {
   // Note: This function is based off of the java `hashset`, which is an enforced array of structures, which in our case are contracts.
   // This method should be used to make sure when we have an array of structures, we are setting the correct thing in. It
   // will also add a counter variable for us so that all of our code is consistent.
-  // A use case would be if you wanted to have a vendor loop, you need an array of vendor entities. You would use the
+  // A use case would be if you wanted to have a vendor loop, you need an array of vendor contracts. You would use the
   // hashset to accomplish this and effectively make sure you always had the correct information in the array positions.
   var defaults = {
    'contract' = arguments.contract,
@@ -40,9 +40,9 @@ public struct function hashSet(
 
 public void function addHash(
   required any hash, // the hashset we wish to add to
-  required any value // the value we want to add, which should be an entity
+  required any value // the value we want to add, which should be a contract
 ){
-  // Note: When used with hashsets, will validate and then add a single new entity to a particular hash.
+  // Note: When used with hashsets, will validate and then add a single new contract to a particular hash.
   if(arguments.hash.contract == arguments.value.contract){ // if the contracts match, then trust that we have valid data.
    arguments.hash.build.count++;
    arrayAppend(arguments.hash.build.list, duplicate(arguments.value.build));
@@ -73,18 +73,18 @@ public struct function getHash(
   return defaults;
 }
 
-// recursively build the visual structure of an entity based on a particular contract
-private any function buildEntity(
+// recursively build the data structure of a contract
+private any function buildContractData(
   required any contract
 ){
   var obj = {};
   var meta = "";
-  var currentContract = arguments.contract(); // the contract passed in is an unexecuted function. Execute the function here to see what it returns.
-  if(isStruct(currentContract)){ // if the executed function returns a structure, then we know we have another contract to drill down into.
-   for(var key in currentContract){ // loop over each key in the contract (keys should only be 1 level deep) to build the contract out
+  var currentContract = arguments.contract(); // the constraint passed in is an unexecuted function. Execute the function here to see what it returns.
+  if(isStruct(currentContract)){ // if the executed function returns a structure, then we know we have another constraint to drill down into.
+   for(var key in currentContract){ // loop over each key in the constraint (keys should only be 1 level deep) to build the contract out
     meta = getMetaData(currentContract[key]);
-    if(isStruct(meta) && structKeyExists(meta, "name")){ //it's a "normal" contract, so call it
-     obj[key] = buildEntity(currentContract[key]); // recursively call this method to build out the entire structure
+    if(isStruct(meta) && structKeyExists(meta, "name")){ //it's a "normal" constraint, so call it
+     obj[key] = buildContractData(currentContract[key]); // recursively call this method to build out the entire data structure
     }
     else if(isStruct(currentContract[key]) && structKeyExists(currentContract[key], "build")){ //it's a hashset, so update it
      obj[key] = currentContract[key].build;
@@ -98,11 +98,11 @@ private any function buildEntity(
 }
 
 
-// End: Contract/Entity handling
+// End: Contract handling
 // Start: Setter handling
 
-//  Note: Setters are used to enforce that what is being sent in to an entity as a value what actually should be there.
-//  This keeps our data extremely reliable and relieves the concernt of a boolean being an empty string, for example, and also
+//  Note: Setters are used to enforce that what is being sent in to a constraint as a value is what actually should be there.
+//  This keeps our data extremely reliable and relieves the concern of a boolean being an empty string, for example, and also
 //  allows us some control over what sort of things are passed back.
 
 // validate & set a string in to a contract
@@ -152,18 +152,18 @@ handler=true
 }
 
 // End: Setter handling
-// Start: Object Accessors
+// Start: Contract Accessors
 
-// set & validate a property into a particular entity
+// set & validate a property into a particular contract
 public void function setProperty(
-  required any theEntity,
+  required any theContract,
   required string key,
   required any value
 ){
   // Note: this function is meant to be called every time a property needs to be set. It will validate the property
   // and add it in to the particular contract correctly.
-  var contract = arguments.theEntity.contract(); // call the contract to get the keys
-  var build = arguments.theEntity.build; // soft copy of the build
+  var contract = arguments.theContract.contract(); // call the contract (aka constraint) to get the keys
+  var build = arguments.theContract.build; // soft copy of the build
   if(structKeyExists(contract, arguments.key)){ // make sure the key really exists in the contract
    contract = contract[arguments.key]; // set the final contract
    // figure out how to set the value.  If neither of the conditions are met below, it means we don't have a way to validate the value being set and therefore we won't set it.
@@ -208,7 +208,7 @@ public any function getProperty(
   return data;
 }
 
-// Purpose: return the fully built entity as a plain structure
+// Purpose: return the fully built contract as a plain data structure
 public any function getData(
   required any theContract
 ){
@@ -220,5 +220,5 @@ public any function getData(
   return build;
 }
 
-// End: Entity Accessors
+// End: Contract Accessors
 }
