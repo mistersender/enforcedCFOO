@@ -209,7 +209,7 @@ public any function getProperty(
 }
 
 // Purpose: return the fully built entity as a plain structure
-public any function getObject(
+public any function getData(
   required any theContract
 ){
   var build = arguments.theContract.build;
